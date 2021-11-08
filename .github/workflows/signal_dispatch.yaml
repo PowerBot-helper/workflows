@@ -1,0 +1,39 @@
+name: Signal workflow dispatch
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: 'repository name given as <owner>/<repo>'
+        required: true
+        type: string
+      workflow:
+        description: 'workflow to dispatch (filename or id)'
+        required: true
+        type: string
+      ref:
+        description: 'branch or tag reference'
+        default: 'main'
+        required: false
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  send-dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: dispatch ${{ inputs.workflow }} in ${{ inputs.repo }}
+        env:
+          token: ${{ secrets.token }}
+          filename: ${{ inputs.workflow }}
+          repo: ${{ inputs.repo }}
+          ref: ${{ inputs.ref }}
+        run: |
+          curl -s -S \
+            -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${token}" \
+            -d "{ \"ref\": \"${ref}\" }" \
+            https://api.github.com/repos/"${repo}"/actions/workflows/"${filename}"/dispatches
