@@ -1,0 +1,37 @@
+name: Fetch raw file from repository
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        description: 'repository name given as <owner>/<repo>'
+        required: true
+        type: string
+      path:
+        description: 'file location in the remote repository'
+        required: true
+        type: string
+      filename:
+        description: 'local filename or path to save to'
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  fetch-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: fetch file from ${{ inputs.repo }}
+        env:
+          token: ${{ secrets.token }}
+          filename: ${{ inputs.filename }}
+          repo: ${{ inputs.repo }}
+          path: ${{ inputs.path }}
+        run: |
+          curl \
+            -H "Accept: application/vnd.github.VERSION.raw" \
+            -H "Authorization: token ${token}" \
+            -o  "${filename}" \
+            https://api.github.com/repos/"${repo}"/contents/"${path}"
