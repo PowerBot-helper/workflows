@@ -1,0 +1,33 @@
+name: Fetch file
+description: Fetch raw file from GitHub repository and save with the given file name.
+
+inputs:
+  repo:
+    description: 'repository name given as <owner>/<repo>'
+    required: true
+  path:
+    description: 'file location in the remote repository'
+    required: true
+  filename:
+    description: 'local filename or path to save to'
+    required: true
+  token:
+    description: 'PAT with repository permission for private repos'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: fetch file from ${{ inputs.repo }}
+      shell: bash
+      env:
+        token: ${{ inputs.token }}
+        filename: ${{ inputs.filename }}
+        repo: ${{ inputs.repo }}
+        path: ${{ inputs.path }}
+      run: |
+        curl \
+          -H "Accept: application/vnd.github.VERSION.raw" \
+          -H "Authorization: token ${token}" \
+          -o  "${filename}" \
+          https://api.github.com/repos/"${repo}"/contents/"${path}"
