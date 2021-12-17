@@ -3,16 +3,20 @@ description: Fetch raw file from GitHub repository and save with the given file 
 
 inputs:
   repo:
-    description: 'repository name given as <owner>/<repo>'
+    description: "repository name given as <owner>/<repo>"
     required: true
   path:
-    description: 'file location in the remote repository'
+    description: "file location in the remote repository"
     required: true
   filename:
-    description: 'local filename or path to save to'
+    description: "local filename or path to save to"
     required: true
+  ref:
+    description: "The name of the commit/branch/tag."
+    default: main
+    required: false
   token:
-    description: 'PAT with repository permission for private repos'
+    description: "PAT with repository permission for private repos"
     required: false
 
 runs:
@@ -25,9 +29,11 @@ runs:
         filename: ${{ inputs.filename }}
         repo: ${{ inputs.repo }}
         path: ${{ inputs.path }}
+        ref: ${{ inputs.ref }}
+      # see https://docs.github.com/en/rest/reference/repos#get-repository-content
       run: |
         curl \
           -H "Accept: application/vnd.github.VERSION.raw" \
           -H "Authorization: token ${token}" \
           -o  "${filename}" \
-          https://api.github.com/repos/"${repo}"/contents/"${path}"
+          https://api.github.com/repos/"${repo}"/contents/"${path}"?ref="${ref}"
