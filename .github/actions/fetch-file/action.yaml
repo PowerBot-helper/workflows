@@ -37,3 +37,10 @@ runs:
           -H "Authorization: token ${token}" \
           -o  "${filename}" \
           https://api.github.com/repos/"${repo}"/contents/"${path}"?ref="${ref}"
+    - name: rewrite version
+      if: contains(inputs.ref, 'tags')
+      env:
+        filename: ${{ inputs.filename }}
+        ref: ${{ inputs.ref }}
+      shell: bash
+      run: sed -i "s|0\.0\.0|${ref##*/}|g" "${filename}"
